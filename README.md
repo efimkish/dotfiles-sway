@@ -72,5 +72,6 @@
 
 1. **Клонируйте репозиторий:**
    ```bash
-   git clone [https://github.com/efimkish/dotfiles-sway.git](https://github.com/efimkish/dotfiles-sway.git)
+   git clone https://github.com/efimkish/dotfiles-sway.git
    cd dotfiles-sway
+   ./install.sh
