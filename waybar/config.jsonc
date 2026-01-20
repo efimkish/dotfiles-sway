@@ -1,0 +1,65 @@
+{
+    "layer": "top",
+    "position": "top",
+    "margin-top": 5,
+    "margin-left": 10,
+    "margin-right": 10,
+    "spacing": 10,
+
+    "modules-left": ["sway/workspaces", "sway/mode"],
+    "modules-center": ["clock"],
+    "modules-right": ["network", "sway/language", "battery", "backlight", "pulseaudio", "tray"],
+
+    "sway/workspaces": {
+        "disable-scroll": true,
+        "all-outputs": true,
+        "format": "{name}",
+        "on-click": "activate"
+    },
+
+    "clock": {
+        "format": "󰃭  {:%H:%M}",
+        "tooltip-format": "{calendar}",
+        "on-click": "gsimplecal"
+    },
+
+    "network": {
+        /* Добавил пробелы после иконок */
+        "format-wifi": "   {essid}",
+        "format-ethernet": "󰈀   Ethernet",
+        "format-disconnected": "󰖪   Нет сети",
+        "on-click": "~/.config/waybar/scripts/wifi.sh"
+    },
+
+    "sway/language": {
+        /* Добавил пробел */
+        "format": "󰌌  {short}",
+        "on-click": "swaymsg input type:keyboard xkb_switch_layout next"
+    },
+
+    "battery": {
+        "format": "{icon}  {capacity}%",
+        "format-icons": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
+        "on-click": "~/.config/waybar/scripts/power.sh"
+    },
+
+    "backlight": {
+        /* Добавил пробел */
+        "format": "{icon}  {percent}%",
+        "format-icons": ["󰃞", "󰃟", "󰃠"],
+        "on-scroll-up": "brightnessctl set 5%+",
+        "on-scroll-down": "brightnessctl set 5%-"
+    },
+
+    "pulseaudio": {
+        "format": "{icon}  {volume}%",
+        "format-muted": "󰝟",
+        "format-icons": { "default": ["󰕿", "󰖀", "󰕾"] },
+        "on-click": "pavucontrol"
+    },
+
+    "tray": {
+        "icon-size": 18,
+        "spacing": 10
+    }
+}

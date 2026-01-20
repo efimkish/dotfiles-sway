@@ -1,0 +1,55 @@
+configuration {
+    modi: "drun,run";
+    show-icons: true;
+    font: "JetBrainsMono Nerd Font 12";
+}
+
+* {
+    background-color: transparent;
+    text-color: #2c3e50; /* Темный текст */
+    margin: 0;
+    padding: 0;
+    spacing: 0;
+}
+
+window {
+    background-color: #bdc3c7; /* Серебро */
+    border: 2px;
+    border-color: #95a5a6;
+    border-radius: 15px;
+    width: 400px;
+    padding: 15px;
+}
+
+inputbar {
+    children: [ prompt, entry ];
+    background-color: #ecf0f1; /* Почти белый для ввода */
+    border-radius: 10px;
+    padding: 8px;
+    margin: 0 0 10px 0;
+}
+
+prompt {
+    padding: 0 10px 0 0;
+    text-color: #7f8c8d;
+}
+
+entry {
+    placeholder: "Поиск...";
+    text-color: #2c3e50;
+}
+
+listview {
+    lines: 8;
+    scrollbar: false;
+}
+
+element {
+    padding: 8px;
+    border-radius: 8px;
+}
+
+element selected {
+    background-color: #7f8c8d; /* Темно-серый при выборе */
+    text-color: #ffffff;
+}

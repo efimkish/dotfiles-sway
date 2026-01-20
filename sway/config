@@ -1,0 +1,316 @@
+# при написании конфигурации постарадал один 17 летний лысый ребенок
+# Prod By septumman
+
+
+##################################################################
+#                          ОБЩИЕ ПЕРЕМЕННЫЕ
+##################################################################
+
+# Главная клавиша модификатора (Win)
+set $mod Mod4
+
+# Дополнительная клавиша (Alt)
+set $alt Mod1
+
+# Терминал по умолчанию
+set $term kitty
+
+# Браузер
+set $browser firefox
+
+# Файловый менеджер
+set $file_manager nautilus
+
+
+##################################################################
+#                          МЕНЮ ЗАПУСКА (ROFI)
+##################################################################
+
+# Главное меню приложений (drun)
+set $menu rofi -show drun -modi drun -show-icons -config ~/.config/rofi/config.rasi
+
+# Меню переключения между окнами
+set $window_menu rofi -show window -modi window -show-icons -config ~/.config/rofi/config.rasi
+
+
+##################################################################
+#                     ПЕРЕМЕННЫЕ ОКРУЖЕНИЯ
+##################################################################
+
+# Передаём переменные окружения в systemd user session
+exec dbus-update-activation-environment --systemd WAYLAND_DISPLAY SWAYSOCK DISPLAY XDG_CURRENT_DESKTOP=sway
+
+
+##################################################################
+#                           АВТОЗАПУСК
+##################################################################
+
+# Polkit агент
+exec /usr/libexec/polkit-gnome-authentication-agent-1
+
+# Wayland порталы (Flatpak, OBS, браузеры)
+exec /usr/libexec/xdg-desktop-portal-wlr
+exec /usr/libexec/xdg-desktop-portal
+
+# Буфер обмена (текст)
+exec wl-paste --type text --watch cliphist store
+
+# Буфер обмена (изображения)
+exec wl-paste --type image --watch cliphist store
+
+# Центр уведомлений
+exec swaync
+
+# Установка обоев
+exec_always swaybg -i /home/septumman/Pictures/01.jpg -m fill
+# Статус-бар
+exec waybar
+
+# Telegram (для уведомлений)
+exec Telegram
+
+# Bluetooth демон
+exec_always blueman-applet
+
+# Wi-Fi
+exec nmcli radio wifi on
+
+
+##################################################################
+#                       GTK / ТЕМЫ
+##################################################################
+
+# Тёмная GTK тема
+exec_always gsettings set org.gnome.desktop.interface gtk-theme "Adwaita-dark"
+
+# Иконки
+exec_always gsettings set org.gnome.desktop.interface icon-theme "Papirus-Dark"
+
+# Курсор
+exec_always gsettings set org.gnome.desktop.interface cursor-theme "Adwaita"
+
+# Тёмный режим
+exec_always gsettings set org.gnome.desktop.interface color-scheme "prefer-dark"
+
+
+##################################################################
+#                           ВНЕШНИЙ ВИД
+##################################################################
+
+# Отступы
+gaps inner 6
+gaps outer 6
+
+# Без умных отступов
+smart_gaps off
+# Отключение границ
+smart_borders off
+
+# Цвета
+set $bg        #0f1114
+set $inactive  #2a2d31
+set $active    #cfd3d8
+set $accent    #8e9399
+set $text      #f2f4f6
+set $urgent    #6b6f75
+
+# Рамки
+default_border pixel 3
+# Граница плавающего окна
+default_floating_border pixel 3
+
+# Полное отключение всех заголовков окон
+for_window [all] titlebar_border none
+for_window [all] titlebar_padding 0 0
+for_window [all] border pixel 3
+
+# Цвета окон
+client.focused          $active   $active   $text   $accent  $active
+client.unfocused        $inactive $inactive $text   $inactive $inactive
+client.focused_inactive $inactive $inactive $text   $inactive $inactive
+client.urgent           $urgent   $urgent   $text   $urgent   $urgent
+
+
+##################################################################
+#                  ТАЙЛИНГ И УПРАВЛЕНИЕ ОКНАМИ
+##################################################################
+
+# --- Перемещение фокуса (Vim-style) ---
+bindsym $mod+h focus left
+bindsym $mod+j focus down
+bindsym $mod+k focus up
+bindsym $mod+l focus right
+
+# --- Перемещение окон (Vim-style) ---
+bindsym $mod+Shift+h move left
+bindsym $mod+Shift+j move down
+bindsym $mod+Shift+k move up
+bindsym $mod+Shift+l move right
+
+# --- Разделение окон (Splits) ---
+# Направление для следующего окна
+bindsym $mod+b splith
+bindsym $mod+v splitv
+# Переключить текущую разметку (обычный режим)
+bindsym $mod+e layout toggle split
+
+# --- Изменение размера (Resize Mode) ---
+bindsym $mod+r mode "resize"
+mode "resize" {
+    bindsym h resize shrink width 10 px
+    bindsym j resize grow height 10 px
+    bindsym k resize shrink height 10 px
+    bindsym l resize grow width 10 px
+    
+    bindsym Left resize shrink width 10 px
+    bindsym Down resize grow height 10 px
+    bindsym Up resize shrink height 10 px
+    bindsym Right resize grow width 10 px
+
+    bindsym Return mode "default"
+    bindsym Escape mode "default"
+}
+
+# --- Прочее управление ---
+bindsym $mod+f fullscreen
+bindsym $mod+Shift+Space floating toggle
+bindsym $mod+Space focus mode_toggle
+bindsym $mod+a focus parent
+
+##################################################################
+#                           ПРИЛОЖЕНИЯ
+##################################################################
+
+# Терминал (Win + Enter)
+bindsym $mod+Return exec $term
+
+# Меню приложений (Win + Shift + w)
+bindsym $mod+Shift+w exec $menu
+
+# Файловый менеджер (Win + Shift + e)
+bindsym $mod+Shift+e exec $file_manager
+
+# Браузер (Win + Shift + b)
+bindsym $mod+Shift+b exec $browser
+
+# Telegram (Win + Shift + t)
+bindsym $mod+Shift+t exec Telegram
+
+# Obsidian (Win + Shift + o)
+bindsym $mod+Shift+o exec flatpak run md.obsidian.Obsidian
+
+# Rnote (Win + Shift + r)
+bindsym $mod+Shift+r exec flatpak run com.github.flxzt.rnote
+
+# Меню буфера обмена (Win + Shift + v)
+bindsym $mod+Shift+v exec cliphist list | rofi -dmenu -config ~/.config/rofi/config.rasi | cliphist decode | wl-copy
+
+#Музыка 
+bindsym $mod+Shift+m exec flatpak run com.github.neithern.g4music
+##################################################################
+#                           ГОРЯЧИЕ КЛАВИШИ
+##################################################################
+
+# Закрыть окно
+bindsym $mod+q kill
+
+# Перезагрузка конфига
+bindsym $mod+Shift+c reload
+
+# Выход из Sway
+bindsym $mod+Shift+BackSpace exec swaynag -t warning -m "Сосал?" -B "Да" "swaymsg exit"
+
+
+##################################################################
+#                           РАБОЧИЕ СТОЛЫ
+##################################################################
+
+# Переключение на рабочий стол (Win + Цифра)
+bindsym $mod+1 workspace number 1
+bindsym $mod+2 workspace number 2
+bindsym $mod+3 workspace number 3
+bindsym $mod+4 workspace number 4
+bindsym $mod+5 workspace number 5
+bindsym $mod+6 workspace number 6
+bindsym $mod+7 workspace number 7
+bindsym $mod+8 workspace number 8
+bindsym $mod+9 workspace number 9
+bindsym $mod+0 workspace number 10
+
+# Перемещение окна на рабочий стол (Win + Shift + Цифра)
+bindsym $mod+Shift+1 move container to workspace number 1
+bindsym $mod+Shift+2 move container to workspace number 2
+bindsym $mod+Shift+3 move container to workspace number 3
+bindsym $mod+Shift+4 move container to workspace number 4
+bindsym $mod+Shift+5 move container to workspace number 5
+bindsym $mod+Shift+6 move container to workspace number 6
+bindsym $mod+Shift+7 move container to workspace number 7
+bindsym $mod+Shift+8 move container to workspace number 8
+bindsym $mod+Shift+9 move container to workspace number 9
+bindsym $mod+Shift+0 move container to workspace number 10
+
+
+##################################################################
+#                           МУЛЬТИМЕДИА
+##################################################################
+
+#F клавиши на синк паде l13, хз как на других
+bindsym --locked XF86AudioMute exec wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
+bindsym --locked XF86AudioLowerVolume exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-
+bindsym --locked XF86AudioRaiseVolume exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+
+
+bindsym --locked XF86AudioMicMute exec wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle
+
+bindsym --locked XF86MonBrightnessDown exec brightnessctl set 5%-
+bindsym --locked XF86MonBrightnessUp exec brightnessctl set 5%+
+
+
+##################################################################
+#                           СКРИНШОТЫ
+##################################################################
+
+bindsym Print exec grim -g "$(slurp)" /home/septumman/Pictures/screenshot/$(date +'%Y-%m-%d_%H-%M-%S').png && wl-copy < /home/septumman/Pictures/screenshot/$(ls -t /home/septumman/Pictures/screenshot | head -n1)
+bindsym Shift+Print exec grim /home/septumman/Pictures/screenshot/$(date +'%Y-%m-%d_%H-%M-%S').png && wl-copy < /home/septumman/Pictures/screenshot/$(ls -t /home/septumman/Pictures/screenshot | head -n1)
+
+
+##################################################################
+#                           ВВОД
+##################################################################
+
+#клава
+input "type:keyboard" {
+  xkb_layout us,ru
+  # Переключение раскладки на Alt + Shift
+  xkb_options grp:alt_shift_toggle
+  repeat_rate 30
+  repeat_delay 300
+}
+
+#тач пад
+input "type:touchpad" {
+  tap enabled
+  natural_scroll enabled
+  scroll_factor 1.5
+  dwt enabled
+  pointer_accel 0.5
+}
+
+#дрова под граф планшет
+exec dexptablet
+
+
+##################################################################
+#                      ПРОЧЕЕ
+##################################################################
+
+# Перетаскивание плавающих окон мышкой
+floating_modifier $mod normal
+# Поддержка приложений X11
+xwayland enable
+
+# Отключаем клиентские декорации (CSD)
+for_window [all] border pixel 3
+for_window [all] cs_outlines disable
+# Принудительно убираем заголовки, если они пролезли
+default_border pixel 3
+default_floating_border pixel 3
