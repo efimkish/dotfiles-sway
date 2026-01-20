@@ -1,11 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-# ======================================================
-# Universal Dotfiles Installer (SwayWM, Kitty, Fastfetch)
-# Works on Arch/Manjaro, Fedora (with RPM Fusion), Debian/Ubuntu
-# ======================================================
-
 echo "=== Detecting OS ==="
 if [ -f /etc/arch-release ]; then
     OS="arch"
@@ -17,88 +12,57 @@ else
     echo "Unsupported OS"
     exit 1
 fi
-echo "Detected OS: $OS"
 
-# ======================================================
-# Update system and install native packages
-# ======================================================
-echo "=== Installing native packages ==="
-
+# 1. Установка системных пакетов
+echo "=== Installing native packages for $OS ==="
 if [ "$OS" = "arch" ]; then
     sudo pacman -Syu --needed --noconfirm \
-    sway swaybg waybar rofi kitty nautilus firefox polkit-gnome xdg-desktop-portal-wlr \
-    wl-clipboard cliphist grim slurp brightnessctl wireplumber pavucontrol blueman networkmanager gsimplecal telegram-desktop dexptablet \
-    ttf-jetbrains-mono-nerd papirus-icon-theme adwaita-icon-theme
-
+    sway swaybg waybar rofi-wayland kitty nautilus firefox polkit-gnome xdg-desktop-portal-wlr \
+    wl-clipboard cliphist grim slurp brightnessctl wireplumber pavucontrol blueman networkmanager \
+    gsimplecal telegram-desktop dexptablet ttf-jetbrains-mono-nerd papirus-icon-theme adwaita-icon-theme fastfetch
+    
 elif [ "$OS" = "fedora" ]; then
-    echo "=== Adding RPM Fusion repositories ==="
     sudo dnf install -y https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm || true
     sudo dnf install -y https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm || true
-
-    echo "=== Installing native packages + multimedia codecs ==="
-    sudo dnf install -y --skip-unavailable \
-    sway swaybg waybar rofi kitty nautilus firefox xdg-desktop-portal-wlr \
+    # Добавлен --allowerasing для решения конфликта ffmpeg
+    sudo dnf install -y --allowerasing --skip-unavailable \
+    sway swaybg waybar rofi-wayland kitty nautilus firefox xdg-desktop-portal-wlr \
     wl-clipboard grim slurp brightnessctl wireplumber pavucontrol blueman NetworkManager telegram-desktop \
-    papirus-icon-theme adwaita-icon-theme || true
-
-    # Multimedia codecs
-    sudo dnf install -y --skip-unavailable @multimedia gstreamer1-plugins-{bad-free,good,ugly} ffmpeg || true
+    papirus-icon-theme adwaita-icon-theme @multimedia gstreamer1-plugins-{bad-free,good,ugly} ffmpeg fastfetch
 
 elif [ "$OS" = "debian" ]; then
-    sudo apt update
-    sudo apt install -y \
-    sway swaybg waybar rofi kitty nautilus firefox policykit-1 xdg-desktop-portal-wlr \
-    wl-clipboard cliphist grim slurp brightnessctl pipewire wireplumber pavucontrol blueman network-manager gsimplecal telegram-desktop \
-    fonts-jetbrains-mono papirus-icon-theme adwaita-icon-theme || true
+    sudo apt update && sudo apt install -y \
+    sway swaybg waybar rofi kitty nautilus firefox xdg-desktop-portal-wlr \
+    wl-clipboard cliphist grim slurp brightnessctl wireplumber pavucontrol blueman network-manager \
+    gsimplecal telegram-desktop fonts-jetbrains-mono papirus-icon-theme adwaita-icon-theme fastfetch
 fi
 
-# ======================================================
-# Flatpak & Flathub
-# ======================================================
+# 2. Flatpak приложения
 echo "=== Installing Flatpak apps ==="
-
-if ! command -v flatpak &>/dev/null; then
-    echo "Installing Flatpak..."
-    if [ "$OS" = "arch" ]; then
-        sudo pacman -S --needed --noconfirm flatpak
-    elif [ "$OS" = "fedora" ]; then
-        sudo dnf install -y flatpak
-    elif [ "$OS" = "debian" ]; then
-        sudo apt install -y flatpak
-    fi
-fi
-
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-
 flatpak install -y flathub \
-md.obsidian.Obsidian \
-com.github.flxzt.rnote \
-com.github.neithern.g4music \
-com.discordapp.Discord \
-com.github.tchx84.Flatseal \
-org.vinegarhq.Sober || true
+md.obsidian.Obsidian com.github.flxzt.rnote com.github.neithern.g4music \
+com.discordapp.Discord com.github.tchx84.Flatseal org.vinegarhq.Sober \
 
-# ======================================================
-# GTK theme & cursor
-# ======================================================
-echo "=== Setting GTK theme and cursor ==="
-gsettings set org.gnome.desktop.interface gtk-theme "Adwaita-dark" || true
-gsettings set org.gnome.desktop.interface cursor-theme "Adwaita" || true
-
-# ======================================================
-# Link dotfiles
-# ======================================================
-echo "=== Linking dotfiles ==="
-
+# 3. Линковка конфигов (С ПОЛНОЙ ПЕРЕЗАПИСЬЮ)
+echo "=== Linking dotfiles to ~/.config ==="
 CONFIG_DIR="$HOME/.config"
 mkdir -p "$CONFIG_DIR"
 
-for conf in sway kitty fastfetch waybar; do
-    if [ -d "$PWD/$conf" ]; then
-        ln -sf "$PWD/$conf" "$CONFIG_DIR/$conf"
-        echo "Linked $conf"
+# Список папок для линковки (добавь свои, если нужно)
+DIRS=("sway" "waybar" "kitty" "rofi" "swaync" "fastfetch")
+
+for dir in "${DIRS[@]}"; do
+    if [ -d "$PWD/$dir" ]; then
+        echo "Linking $dir..."
+        rm -rf "$CONFIG_DIR/$dir" # Удаляем старую папку/ссылку, чтобы не было ошибки
+        ln -sf "$PWD/$dir" "$CONFIG_DIR/"
     fi
 done
 
-echo "=== Done! ==="
-echo "You may need to logout/login to apply some settings."
+# 4. Делаем скрипты исполняемыми
+echo "=== Setting executable permissions for scripts ==="
+[ -d "$CONFIG_DIR/waybar/scripts" ] && chmod +x "$CONFIG_DIR/waybar/scripts/"*.sh
+[ -d "$CONFIG_DIR/sway/scripts" ] && chmod +x "$CONFIG_DIR/sway/scripts/"*.sh
+
+echo "=== Installation Complete! Please restart Sway. ==="
